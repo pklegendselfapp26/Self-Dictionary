@@ -3,29 +3,31 @@ name: Build Android APK
 on:
   push:
     branches: [ main ]
-  workflow_dispatch: # This adds a manual "Run workflow" button in GitHub!
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
       - name: Install System Dependencies
         run: |
           sudo apt-get update
+          # Updated to libtinfo6 and standard libncurses-dev for Ubuntu 24.04 compatibility
           sudo apt-get install -y \
-            build-essential libsqlite3-dev sqlite3 bzip2 libbz2-dev \
-            zlib1g-dev libssl-dev openssl libgdbm-dev libgdbm-compat-dev \
-            liblzma-dev libreadline-dev libncursesw5-dev libffi-dev \
-            uuid-dev libffi8 openjdk-17-jdk autoconf libtool pkg-config \
-            zip unzip
+            build-essential git zip unzip openjdk-17-jdk python3-pip \
+            autoconf libtool pkg-config zlib1g-dev libncurses-dev \
+            libtinfo6 cmake libffi-dev libssl-dev libsqlite3-dev sqlite3 bzip2 \
+            libbz2-dev libgdbm-dev libgdbm-compat-dev liblzma-dev libreadline-dev \
+            uuid-dev libltdl-dev lld gettext
 
       - name: Install Python Tools
         run: |
@@ -33,9 +35,10 @@ jobs:
           pip install buildozer cython==0.29.33 setuptools virtualenv
 
       - name: Build with Buildozer
-        run: buildozer android debug
+        run: |
+          buildozer android clean
+          yes | buildozer android debug
         env:
-          # This specifically stops the GitHub Action from hanging forever waiting for you to type "Yes"
           ACCEPT_SDK_LICENSE: "y"
 
       - name: Upload APK
@@ -43,4 +46,3 @@ jobs:
         with:
           name: Dictionary-App-APK
           path: bin/*.apk
-

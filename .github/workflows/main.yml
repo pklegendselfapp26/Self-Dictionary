@@ -21,7 +21,6 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          # Updated to libtinfo6 and standard libncurses-dev for Ubuntu 24.04 compatibility
           sudo apt-get install -y \
             build-essential git zip unzip openjdk-17-jdk python3-pip \
             autoconf libtool pkg-config zlib1g-dev libncurses-dev \
@@ -35,9 +34,8 @@ jobs:
           pip install buildozer cython==0.29.33 setuptools virtualenv
 
       - name: Build with Buildozer
-        run: |
-          buildozer android clean
-          yes | buildozer android debug
+        # Removed the 'clean' command causing the crash. Going straight to debug!
+        run: yes | buildozer android debug
         env:
           ACCEPT_SDK_LICENSE: "y"
 
